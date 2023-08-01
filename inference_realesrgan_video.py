@@ -171,40 +171,40 @@ class Writer:
 
 def inference_video(args, video_save_path, device=None, total_workers=1, worker_idx=0):
     # ---------------------- determine models according to model names ---------------------- #
-    args.model_name = args.model_name.split('.pth')[0]
-    if args.model_name in ['RealESRGAN_x4plus', 'RealESRNet_x4plus']:  # x4 RRDBNet model
-        model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
-        netscale = 4
-    elif args.model_name in ['RealESRGAN_x4plus_anime_6B']:  # x4 RRDBNet model with 6 blocks
-        model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=6, num_grow_ch=32, scale=4)
-        netscale = 4
-    elif args.model_name in ['RealESRGAN_x2plus']:  # x2 RRDBNet model
-        model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=2)
-        netscale = 2
-    elif args.model_name in ['realesr-animevideov3']:  # x4 VGG-style model (XS size)
-        model = SRVGGNetCompact(num_in_ch=3, num_out_ch=3, num_feat=64, num_conv=16, upscale=4, act_type='prelu')
-        netscale = 4
-    else:
-        raise NotImplementedError
+    # args.model_name = args.model_name.split('.pth')[0]
+    # if args.model_name in ['RealESRGAN_x4plus', 'RealESRNet_x4plus']:  # x4 RRDBNet model
+    #     model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
+    #     netscale = 4
+    # elif args.model_name in ['RealESRGAN_x4plus_anime_6B']:  # x4 RRDBNet model with 6 blocks
+    #     model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=6, num_grow_ch=32, scale=4)
+    #     netscale = 4
+    # elif args.model_name in ['RealESRGAN_x2plus']:  # x2 RRDBNet model
+    #     model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=2)
+    #     netscale = 2
+    # elif args.model_name in ['realesr-animevideov3']:  # x4 VGG-style model (XS size)
+    #     model = SRVGGNetCompact(num_in_ch=3, num_out_ch=3, num_feat=64, num_conv=16, upscale=4, act_type='prelu')
+    #     netscale = 4
+    # else:
+    #     raise NotImplementedError
 
     # ---------------------- determine model paths ---------------------- #
-    model_path = os.path.join('experiments/pretrained_models', args.model_name + '.pth')
-    if not os.path.isfile(model_path):
-        model_path = os.path.join('realesrgan/weights', args.model_name + '.pth')
-    if not os.path.isfile(model_path):
-        raise ValueError(f'Model {args.model_name} does not exist.')
+    # model_path = os.path.join('experiments/pretrained_models', args.model_name + '.pth')
+    # if not os.path.isfile(model_path):
+    #     model_path = os.path.join('realesrgan/weights', args.model_name + '.pth')
+    # if not os.path.isfile(model_path):
+    #     raise ValueError(f'Model {args.model_name} does not exist.')
 
     # restorer
-    upsampler = RealESRGANer(
-        scale=netscale,
-        model_path=model_path,
-        model=model,
-        tile=args.tile,
-        tile_pad=args.tile_pad,
-        pre_pad=args.pre_pad,
-        half=not args.fp32,
-        device=device,
-    )
+    # upsampler = RealESRGANer(
+    #     scale=netscale,
+    #     model_path=model_path,
+    #     model=model,
+    #     tile=args.tile,
+    #     tile_pad=args.tile_pad,
+    #     pre_pad=args.pre_pad,
+    #     half=not args.fp32,
+    #     device=device,
+    # )
 
     if 'anime' in args.model_name and args.face_enhance:
         print('face_enhance is not supported in anime models, we turned this option off for you. '
@@ -218,9 +218,10 @@ def inference_video(args, video_save_path, device=None, total_workers=1, worker_
             upscale=args.outscale,
             arch='clean',
             channel_multiplier=2,
-            bg_upsampler=upsampler)  # TODO support custom device
-    else:
-        face_enhancer = None
+            # bg_upsampler=upsampler
+        )  # TODO support custom device
+    # else:
+    #     face_enhancer = None
 
     reader = Reader(args, total_workers, worker_idx)
     audio = reader.get_audio()
@@ -237,8 +238,8 @@ def inference_video(args, video_save_path, device=None, total_workers=1, worker_
         try:
             if args.face_enhance:
                 _, _, output = face_enhancer.enhance(img, has_aligned=False, only_center_face=False, paste_back=True)
-            else:
-                output, _ = upsampler.enhance(img, outscale=args.outscale)
+            # else:
+            #     output, _ = upsampler.enhance(img, outscale=args.outscale)
         except RuntimeError as error:
             print('Error', error)
             print('If you encounter CUDA out of memory, try to set --tile with a smaller number.')
